@@ -4,7 +4,13 @@
 # CMakeLists.txt for bridge module
 
 cmake_minimum_required(VERSION 3.10)
-project(mav2grpc_bridge VERSION 1.0.0 LANGUAGES CXX)
+project(mavlink2grpc VERSION 0.0.1 LANGUAGES CXX)
+
+# Configure Version.h using project version
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/Version.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/generated/Version.h"
+)
 
 find_package(Protobuf REQUIRED)
 find_package(Threads REQUIRED)
@@ -90,6 +96,7 @@ set(LIBMAV_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/libmav/include
 target_include_directories(${PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${GENERATED_PROTOBUF_PATH}
+  ${CMAKE_CURRENT_BINARY_DIR}/generated
 )
 
 # libmav headers as system includes to suppress warnings

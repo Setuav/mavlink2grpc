@@ -8,7 +8,7 @@
 #include <sstream>
 #include <algorithm>
 
-namespace mav2grpc {
+namespace mavlink2grpc {
 
 bool StreamSubscription::matches(const mavlink::MavlinkMessage& msg) const {
   // Check system ID filter (0 = all systems)
@@ -151,4 +151,4 @@ size_t Router::cleanup_inactive() {
   return removed;
 }
 
-} // namespace mav2grpc
+} // namespace mavlink2grpc

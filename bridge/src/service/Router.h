@@ -17,7 +17,7 @@
 #include <memory>
 #include <functional>
 
-namespace mav2grpc {
+namespace mavlink2grpc {
 
 /**
  * @brief Subscription to a message stream with filtering.
@@ -127,4 +127,4 @@ private:
   uint64_t next_subscription_id_{1};                 ///< Next ID to assign
 };
 
-} // namespace mav2grpc
+} // namespace mavlink2grpc

@@ -19,7 +19,7 @@
 #include <atomic>
 #include <condition_variable>
 
-namespace mav2grpc {
+namespace mavlink2grpc {
 
 /**
  * @brief Thread-safe asynchronous logger.
@@ -102,5 +102,5 @@ private:
   std::condition_variable log_condition_;   ///< Notification for new logs
 };
 
-} // namespace mav2grpc
+} // namespace mavlink2grpc
 

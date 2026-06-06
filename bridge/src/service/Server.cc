@@ -9,7 +9,7 @@
 #include <sstream>
 #include <thread>
 
-namespace mav2grpc {
+namespace mavlink2grpc {
 
 Server::Server(std::shared_ptr<MavlinkBridgeServiceImpl> service, 
                const std::string& address)
@@ -99,4 +99,4 @@ bool Server::is_running() const {
   return running_;
 }
 
-} // namespace mav2grpc
+} // namespace mavlink2grpc

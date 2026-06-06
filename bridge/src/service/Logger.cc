@@ -9,7 +9,7 @@
 #include <chrono>
 #include <iostream>
 
-namespace mav2grpc {
+namespace mavlink2grpc {
 
 Logger& Logger::Instance() {
   static Logger instance;
@@ -108,4 +108,4 @@ void Logger::Log(Level level, const std::string& message) {
   log_condition_.notify_one();
 }
 
-} // namespace mav2grpc
+} // namespace mavlink2grpc

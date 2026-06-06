@@ -4,13 +4,14 @@
  */
 
 #include "Bridge.h"
+#include "Version.h"
 #include "service/Logger.h"
 #include <csignal>
 #include <iostream>
 #include <memory>
 #include <sstream>
 
-using namespace mav2grpc;
+using namespace mavlink2grpc;
 
 // Global bridge instance for signal handling
 std::unique_ptr<Bridge> g_bridge;
@@ -79,7 +80,7 @@ int main(int argc, char* argv[]) {
   std::signal(SIGINT, signal_handler);
   std::signal(SIGTERM, signal_handler);
 
-  Logger::Info("MAVLink to gRPC Bridge starting...");
+  Logger::Info("MAVLink to gRPC Bridge v" MAVLINK2GRPC_VERSION " starting...");
 
   std::cout << "Configuration:\n"
             << "  Connection: " << connection_url << "\n"

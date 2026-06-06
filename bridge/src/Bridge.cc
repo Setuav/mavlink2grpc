@@ -17,7 +17,7 @@
 #include <vector>
 #include <unistd.h>
 
-namespace mav2grpc {
+namespace mavlink2grpc {
 
 std::unique_ptr<mav::NetworkInterface> Bridge::parse_connection_url(const std::string& url) {
   // URL format: protocol://[host]:port or protocol://device:baudrate
@@ -261,4 +261,4 @@ void Bridge::on_mavlink_message(const mav::Message& msg) {
   }
 }
 
-} // namespace mav2grpc
+} // namespace mavlink2grpc

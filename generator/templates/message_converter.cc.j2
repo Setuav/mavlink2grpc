@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace mav2grpc {
+namespace mavlink2grpc {
 
 uint64_t MessageConverter::get_timestamp_usec() {
   auto now = std::chrono::system_clock::now();
@@ -170,4 +170,4 @@ bool MessageConverter::convert_{{ msg.name|lower }}_from_proto(
 
 {% endfor %}
 
-} // namespace mav2grpc
+} // namespace mavlink2grpc

@@ -8,7 +8,7 @@
 #include <sstream>
 #include <chrono>
 
-namespace mav2grpc {
+namespace mavlink2grpc {
 
 MavlinkBridgeServiceImpl::MavlinkBridgeServiceImpl(
     Router& router,
@@ -106,4 +106,4 @@ void MavlinkBridgeServiceImpl::shutdown() {
   shutdown_cv_.notify_all();
 }
 
-} // namespace mav2grpc
+} // namespace mavlink2grpc

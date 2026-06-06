@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(mavlink2grpc_root LANGUAGES CXX)
+project(mavlink2grpc VERSION 0.0.1 LANGUAGES CXX)
 
 # MAVLink dialect option (defaults to common)
 set(MAVLINK_DIALECT "common" CACHE STRING "MAVLink dialect to generate (minimal, standard, common)")

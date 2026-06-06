@@ -21,7 +21,7 @@
 #include <condition_variable>
 #include <mutex>
 
-namespace mav2grpc {
+namespace mavlink2grpc {
 
 /**
  * @brief Implementation of MavlinkBridge gRPC service.
@@ -99,4 +99,4 @@ private:
   std::mutex shutdown_mtx_;                 ///< Mutex for shutdown synchronization
 };
 
-} // namespace mav2grpc
+} // namespace mavlink2grpc

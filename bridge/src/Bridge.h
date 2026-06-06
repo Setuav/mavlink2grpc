@@ -13,7 +13,7 @@
 #include <memory>
 #include <string>
 
-namespace mav2grpc {
+namespace mavlink2grpc {
 
 /**
  * @brief Connection configuration.
@@ -115,4 +115,4 @@ private:
   bool running_;
 };
 
-} // namespace mav2grpc
+} // namespace mavlink2grpc
