@@ -48,13 +48,13 @@ jobs:
           source venv/bin/activate
           python3 generator/test/test_generator.py
 
-      - name: Verify C++ Build & Run Tests (Dialect: common)
+      - name: "Verify C++ Build & Run Tests (Dialect: common)"
         run: |
           cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DMAVLINK_DIALECT=common
           cmake --build build -j$(nproc)
           cd build && ctest --output-on-failure
 
-      - name: Verify C++ Build & Run Tests (Dialect: minimal)
+      - name: "Verify C++ Build & Run Tests (Dialect: minimal)"
         run: |
           rm -rf build
           cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DMAVLINK_DIALECT=minimal
