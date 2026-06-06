@@ -18,8 +18,10 @@ console = Console()
 
 def main():
     """Test the parser with real MAVLink XML files."""
-    # Path to MAVLink definitions (go up to project root, then to mavlink)
-    xml_dir = Path(__file__).parent.parent.parent / "mavlink" / "message_definitions" / "v1.0"
+    # Path to MAVLink definitions (go up to project root, then to third_party/mavlink or mavlink)
+    xml_dir = Path(__file__).parent.parent.parent / "third_party" / "mavlink" / "message_definitions" / "v1.0"
+    if not xml_dir.exists():
+        xml_dir = Path(__file__).parent.parent.parent / "mavlink" / "message_definitions" / "v1.0"
 
     if not xml_dir.exists():
         console.print(f"[red]Error: MAVLink definitions not found at {xml_dir}[/red]")
