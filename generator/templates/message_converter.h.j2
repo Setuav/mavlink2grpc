@@ -8,7 +8,8 @@
 
 #pragma once
 
-#include <mavlink/common/mavlink.h>
+#include <mav/Message.h>
+#include <mav/MessageSet.h>
 #include <mavlink_bridge.pb.h>
 {% for dialect_name in dialect_names %}
 #include <mavlink/{{ dialect_name }}.pb.h>
@@ -22,25 +23,24 @@ namespace mav2grpc {
 /**
  * @brief Auto-generated converter for MAVLink messages.
  * 
- * Converts between MAVLink C structs and Protocol Buffer messages.
+ * Converts between libmav Message objects and Protocol Buffer messages.
  * Supports {{ messages|length }} message types across {{ dialect_names|length }} dialects.
  */
 class MessageConverter {
 public:
   /**
-   * @brief Converts MAVLink C message to Protocol Buffer.
+   * @brief Converts libmav Message to Protocol Buffer.
    */
   static std::optional<mavlink::MavlinkMessage> 
-  to_proto(const mavlink_message_t& mavlink_msg,
+  to_proto(const mav::Message& mavlink_msg,
            std::optional<uint64_t> timestamp_usec = std::nullopt);
 
   /**
-   * @brief Converts Protocol Buffer message to MAVLink C.
+   * @brief Converts Protocol Buffer message to libmav Message.
    */
-  static std::optional<mavlink_message_t>
+  static std::optional<mav::Message>
   from_proto(const mavlink::MavlinkMessage& proto_msg,
-             uint8_t system_id,
-             uint8_t component_id);
+             const mav::MessageSet& message_set);
 
 private:
   static uint64_t get_timestamp_usec();
@@ -48,14 +48,12 @@ private:
   // Message-specific converters ({{ messages|length }} total)
 {% for msg in messages %}
   static void convert_{{ msg.name|lower }}_to_proto(
-    const mavlink_message_t& mavlink_msg,
+    const mav::Message& mavlink_msg,
     mavlink::MavlinkMessage& proto_msg);
 
   static bool convert_{{ msg.name|lower }}_from_proto(
     const mavlink::{{ msg.dialect }}::{{ sanitize_message_name(msg.name) }}& proto,
-    mavlink_message_t& mavlink_msg,
-    uint8_t system_id,
-    uint8_t component_id);
+    mav::Message& mavlink_msg);
 {% endfor %}
 };
 

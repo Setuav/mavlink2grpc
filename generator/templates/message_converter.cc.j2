@@ -9,6 +9,7 @@
 #include "MessageConverter.h"
 #include <cstring>
 #include <algorithm>
+#include <vector>
 
 namespace mav2grpc {
 
@@ -19,20 +20,20 @@ uint64_t MessageConverter::get_timestamp_usec() {
 }
 
 std::optional<mavlink::MavlinkMessage> 
-MessageConverter::to_proto(const mavlink_message_t& mavlink_msg,
+MessageConverter::to_proto(const mav::Message& mavlink_msg,
                            std::optional<uint64_t> timestamp_usec) {
   mavlink::MavlinkMessage proto_msg;
 
   // Set header fields
-  proto_msg.set_system_id(mavlink_msg.sysid);
-  proto_msg.set_component_id(mavlink_msg.compid);
-  proto_msg.set_message_id(mavlink_msg.msgid);
+  proto_msg.set_system_id(mavlink_msg.header().systemId());
+  proto_msg.set_component_id(mavlink_msg.header().componentId());
+  proto_msg.set_message_id(mavlink_msg.id());
   proto_msg.set_timestamp_usec(timestamp_usec.value_or(get_timestamp_usec()));
 
   // Convert based on message ID
-  switch (mavlink_msg.msgid) {
+  switch (mavlink_msg.id()) {
 {% for msg in messages %}
-    case MAVLINK_MSG_ID_{{ msg.name|upper }}:
+    case {{ msg.id }}:
       convert_{{ msg.name|lower }}_to_proto(mavlink_msg, proto_msg);
       return proto_msg;
 {% endfor %}
@@ -43,24 +44,21 @@ MessageConverter::to_proto(const mavlink_message_t& mavlink_msg,
   }
 }
 
-std::optional<mavlink_message_t>
+std::optional<mav::Message>
 MessageConverter::from_proto(const mavlink::MavlinkMessage& proto_msg,
-                             uint8_t system_id,
-                             uint8_t component_id) {
-  mavlink_message_t mavlink_msg;
-
+                             const mav::MessageSet& message_set) {
   // Handle different payload types
   switch (proto_msg.payload_case()) {
 {% for msg in messages %}
-    case mavlink::MavlinkMessage::k{{ sanitize_message_name(msg.name) }}:
+    case mavlink::MavlinkMessage::k{{ sanitize_message_name(msg.name) }}: {
+      auto msg = message_set.create("{{ msg.name }}");
       if (convert_{{ msg.name|lower }}_from_proto(
             proto_msg.{{ msg.name|lower }}(), 
-            mavlink_msg, 
-            system_id, 
-            component_id)) {
-        return mavlink_msg;
+            msg)) {
+        return msg;
       }
       return std::nullopt;
+    }
 {% endfor %}
 
     case mavlink::MavlinkMessage::PAYLOAD_NOT_SET:
@@ -77,13 +75,9 @@ MessageConverter::from_proto(const mavlink::MavlinkMessage& proto_msg,
 // ============================================================================
 
 void MessageConverter::convert_{{ msg.name|lower }}_to_proto(
-    const mavlink_message_t& mavlink_msg,
+    const mav::Message& mavlink_msg,
     mavlink::MavlinkMessage& proto_msg) {
   
-  // Decode MAVLink message
-  mavlink_{{ msg.name|lower }}_t mavlink_data;
-  mavlink_msg_{{ msg.name|lower }}_decode(&mavlink_msg, &mavlink_data);
-
   // Create proto message
   auto* proto = proto_msg.mutable_{{ msg.name|lower }}();
 
@@ -92,24 +86,26 @@ void MessageConverter::convert_{{ msg.name|lower }}_to_proto(
 {% if field.is_array %}
 {% if field.base_type == 'char' %}
   // String field: {{ field.name }}
-  proto->set_{{ sanitize_field_name(field.name) }}(
-    std::string(mavlink_data.{{ field.name }}, 
-                strnlen(mavlink_data.{{ field.name }}, {{ field.array_length }})));
+  proto->set_{{ sanitize_field_name(field.name) }}(mavlink_msg.getAsString("{{ field.name }}"));
 {% elif field.base_type == 'uint8_t' %}
   // Bytes field: {{ field.name }}
-  proto->set_{{ sanitize_field_name(field.name) }}(
-    std::string(reinterpret_cast<const char*>(mavlink_data.{{ field.name }}), 
-                {{ field.array_length }}));
+  {
+    auto vec = mavlink_msg.get<std::vector<uint8_t>>("{{ field.name }}");
+    proto->set_{{ sanitize_field_name(field.name) }}(
+      std::string(reinterpret_cast<const char*>(vec.data()), vec.size()));
+  }
 {% else %}
   // Repeated array field: {{ field.name }}
-  for (size_t i = 0; i < {{ field.array_length }}; ++i) {
+  {
+    auto vec = mavlink_msg.get<std::vector<{{ field.base_type }}>>("{{ field.name }}");
+    for (const auto& val : vec) {
 {% if field.type_info.is_enum %}
-    proto->add_{{ sanitize_field_name(field.name) }}(
-      static_cast<mavlink::{{ msg.dialect }}::{{ field.type_info.proto_type }}>(
-        mavlink_data.{{ field.name }}[i]));
+      proto->add_{{ sanitize_field_name(field.name) }}(
+        static_cast<mavlink::{{ msg.dialect }}::{{ field.type_info.proto_type }}>(val));
 {% else %}
-    proto->add_{{ sanitize_field_name(field.name) }}(mavlink_data.{{ field.name }}[i]);
+      proto->add_{{ sanitize_field_name(field.name) }}(val);
 {% endif %}
+    }
   }
 {% endif %}
 {% else %}
@@ -117,9 +113,10 @@ void MessageConverter::convert_{{ msg.name|lower }}_to_proto(
 {% if field.type_info.is_enum %}
   proto->set_{{ sanitize_field_name(field.name) }}(
     static_cast<mavlink::{{ msg.dialect }}::{{ field.type_info.proto_type }}>(
-      mavlink_data.{{ field.name }}));
+      mavlink_msg["{{ field.name }}"].as<{{ field.type_info.cpp_type }}>()));
 {% else %}
-  proto->set_{{ sanitize_field_name(field.name) }}(mavlink_data.{{ field.name }});
+  proto->set_{{ sanitize_field_name(field.name) }}(
+    mavlink_msg["{{ field.name }}"].as<{{ field.type_info.cpp_type }}>());
 {% endif %}
 {% endif %}
 {% endfor %}
@@ -127,63 +124,46 @@ void MessageConverter::convert_{{ msg.name|lower }}_to_proto(
 
 bool MessageConverter::convert_{{ msg.name|lower }}_from_proto(
     const mavlink::{{ msg.dialect }}::{{ sanitize_message_name(msg.name) }}& proto,
-    mavlink_message_t& mavlink_msg,
-    uint8_t system_id,
-    uint8_t component_id) {
+    mav::Message& mavlink_msg) {
   
-{% set pack_params = [] %}
 {% for field in msg.fields %}
 {% if field.type != 'uint8_t_mavlink_version' %}
-{% set _ = pack_params.append(field) %}
-{% endif %}
-{% endfor %}
-
-{% for field in pack_params %}
 {% if field.is_array %}
 {% if field.base_type == 'char' %}
   // Convert string to char array
-  char {{ field.name }}_buf[{{ field.array_length }}] = {};
-  const auto& {{ field.name }}_str = proto.{{ sanitize_field_name(field.name) }}();
-  std::strncpy({{ field.name }}_buf, {{ field.name }}_str.c_str(), {{ field.array_length }} - 1);
+  mavlink_msg.set("{{ field.name }}", proto.{{ sanitize_field_name(field.name) }}());
 {% elif field.base_type == 'uint8_t' %}
-  // Convert bytes to uint8_t array
-  uint8_t {{ field.name }}_buf[{{ field.array_length }}] = {};
-  const auto& {{ field.name }}_bytes = proto.{{ sanitize_field_name(field.name) }}();
-  std::memcpy({{ field.name }}_buf, {{ field.name }}_bytes.data(), 
-              std::min({{ field.name }}_bytes.size(), size_t({{ field.array_length }})));
+  // Convert bytes to uint8_t vector
+  {
+    const auto& bytes_val = proto.{{ sanitize_field_name(field.name) }}();
+    std::vector<uint8_t> vec(bytes_val.begin(), bytes_val.end());
+    mavlink_msg.set("{{ field.name }}", vec);
+  }
 {% else %}
-  // Convert repeated field to array
-  {{ field.base_type }} {{ field.name }}_buf[{{ field.array_length }}] = {};
-  for (int i = 0; i < std::min(proto.{{ sanitize_field_name(field.name) }}_size(), {{ field.array_length }}); ++i) {
+  // Convert repeated field to vector
+  {
+    std::vector<{{ field.base_type }}> vec;
+    vec.reserve(proto.{{ sanitize_field_name(field.name) }}_size());
+    for (int i = 0; i < proto.{{ sanitize_field_name(field.name) }}_size(); ++i) {
 {% if field.type_info.is_enum %}
-    {{ field.name }}_buf[i] = static_cast<{{ field.base_type }}>(proto.{{ sanitize_field_name(field.name) }}(i));
+      vec.push_back(static_cast<{{ field.base_type }}>(proto.{{ sanitize_field_name(field.name) }}(i)));
 {% else %}
-    {{ field.name }}_buf[i] = proto.{{ sanitize_field_name(field.name) }}(i);
+      vec.push_back(static_cast<{{ field.base_type }}>(proto.{{ sanitize_field_name(field.name) }}(i)));
 {% endif %}
+    }
+    mavlink_msg.set("{{ field.name }}", vec);
   }
 {% endif %}
+{% else %}
+  // Convert scalar field
+{% if field.type_info.is_enum %}
+  mavlink_msg.set("{{ field.name }}", static_cast<{{ field.type_info.cpp_type }}>(proto.{{ sanitize_field_name(field.name) }}()));
+{% else %}
+  mavlink_msg.set("{{ field.name }}", static_cast<{{ field.type_info.cpp_type }}>(proto.{{ sanitize_field_name(field.name) }}()));
+{% endif %}
+{% endif %}
 {% endif %}
 {% endfor %}
-
-  // Pack MAVLink message
-  mavlink_msg_{{ msg.name|lower }}_pack(
-    system_id,
-    component_id,
-    &mavlink_msg
-{% for field in pack_params %}
-{% if field.is_array %}
-    , {{ field.name }}_buf
-{% elif field.type_info.is_enum %}
-{% if field.name == 'command' %}
-    , static_cast<uint16_t>(proto.{{ sanitize_field_name(field.name) }}())  // MAV_CMD is uint16_t
-{% else %}
-    , static_cast<uint8_t>(proto.{{ sanitize_field_name(field.name) }}())
-{% endif %}
-{% else %}
-    , proto.{{ sanitize_field_name(field.name) }}()
-{% endif %}
-{% endfor %}
-  );
 
   return true;
 }

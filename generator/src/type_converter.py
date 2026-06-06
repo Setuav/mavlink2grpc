@@ -117,6 +117,9 @@ class TypeConverter:
         if enum_name:
             info['proto_type'] = cls.sanitize_enum_name(enum_name)
 
+        if info['cpp_type'] == 'uint8_t_mavlink_version':
+            info['cpp_type'] = 'uint8_t'
+
         return info
 
     @classmethod

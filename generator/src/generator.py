@@ -62,7 +62,7 @@ class ProtoGenerator:
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(content)
 
-        print(f"✓ Generated {output_file}")
+        print(f"[OK] Generated {output_file}")
 
     def generate_bridge_service(
         self,
@@ -93,7 +93,7 @@ class ProtoGenerator:
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(content)
 
-        print(f"✓ Generated {output_file}")
+        print(f"[OK] Generated {output_file}")
 
     def generate_all(
         self,
@@ -131,7 +131,7 @@ class ProtoGenerator:
         bridge_file = output_dir / "mavlink_bridge.proto"
         self.generate_bridge_service(dialect_dict, bridge_file)
 
-        print(f"\n✓ Generated {len(dialects)} dialect proto(s) + 1 bridge service")
+        print(f"\n[OK] Generated {len(dialects)} dialect proto(s) + 1 bridge service")
         print(f"  Output directory: {output_dir}")
 
     def generate_message_converter(
@@ -192,7 +192,7 @@ class ProtoGenerator:
         with open(header_file, "w", encoding="utf-8") as f:
             f.write(header_content)
 
-        print(f"✓ Generated {header_file}")
+        print(f"[OK] Generated {header_file}")
 
         # Generate implementation
         impl_template = self.env.get_template("message_converter.cc.j2")
@@ -205,6 +205,6 @@ class ProtoGenerator:
         with open(impl_file, "w", encoding="utf-8") as f:
             f.write(impl_content)
 
-        print(f"✓ Generated {impl_file}")
+        print(f"[OK] Generated {impl_file}")
         print(f"  Converter supports {len(all_messages)} message types")
 

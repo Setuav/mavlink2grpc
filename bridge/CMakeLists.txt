@@ -85,16 +85,16 @@ add_executable(${PROJECT_NAME}
   $<TARGET_OBJECTS:proto_lib>
 )
 
-set(MAVLINK_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../mavlink/install/include)
+set(LIBMAV_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/libmav/include)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${GENERATED_PROTOBUF_PATH}
 )
 
-# MAVLink headers as system includes to suppress warnings
+# libmav headers as system includes to suppress warnings
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE
-  ${MAVLINK_INCLUDE_DIR}
+  ${LIBMAV_INCLUDE_DIR}
 )
 
 add_dependencies(${PROJECT_NAME} proto_lib)
@@ -110,6 +110,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   CXX_STANDARD 17
   CXX_STANDARD_REQUIRED ON
 )
+
+if (NOT MAVLINK_DIALECT)
+  set(MAVLINK_DIALECT "common" CACHE STRING "MAVLink dialect to generate")
+endif()
+target_compile_definitions(${PROJECT_NAME} PRIVATE MAVLINK_DIALECT="${MAVLINK_DIALECT}")
 
 install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin

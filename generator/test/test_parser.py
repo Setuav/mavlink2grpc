@@ -34,10 +34,10 @@ def main():
     console.print("\n[bold cyan]Test 1: Parsing minimal.xml[/bold cyan]")
     minimal = parser.parse_file("minimal.xml")
 
-    console.print(f"✓ Dialect: {minimal.name}")
-    console.print(f"✓ Version: {minimal.version}")
-    console.print(f"✓ Enums: {len(minimal.enums)}")
-    console.print(f"✓ Messages: {len(minimal.messages)}")
+    console.print(f"[OK] Dialect: {minimal.name}")
+    console.print(f"[OK] Version: {minimal.version}")
+    console.print(f"[OK] Enums: {len(minimal.enums)}")
+    console.print(f"[OK] Messages: {len(minimal.messages)}")
 
     # Show HEARTBEAT message
     if 0 in minimal.messages:
@@ -83,18 +83,18 @@ def main():
     console.print("\n[bold cyan]Test 2: Parsing common.xml[/bold cyan]")
     common = parser.parse_file("common.xml")
 
-    console.print(f"✓ Dialect: {common.name}")
-    console.print(f"✓ Includes: {', '.join(common.includes)}")
-    console.print(f"✓ Enums: {len(common.enums)}")
-    console.print(f"✓ Messages: {len(common.messages)}")
+    console.print(f"[OK] Dialect: {common.name}")
+    console.print(f"[OK] Includes: {', '.join(common.includes)}")
+    console.print(f"[OK] Enums: {len(common.enums)}")
+    console.print(f"[OK] Messages: {len(common.messages)}")
 
     # Test 3: Resolve includes (merge common with its dependencies)
     console.print("\n[bold cyan]Test 3: Resolving includes for common.xml[/bold cyan]")
     merged_common = parser.resolve_includes("common")
 
-    console.print(f"✓ Merged dialect: {merged_common.name}")
-    console.print(f"✓ Total enums: {len(merged_common.enums)}")
-    console.print(f"✓ Total messages: {len(merged_common.messages)}")
+    console.print(f"[OK] Merged dialect: {merged_common.name}")
+    console.print(f"[OK] Total enums: {len(merged_common.enums)}")
+    console.print(f"[OK] Total messages: {len(merged_common.messages)}")
 
     # Show some statistics
     console.print("\n[bold yellow]Message Statistics:[/bold yellow]")
@@ -151,8 +151,8 @@ def main():
 
     console.print(table)
 
-    console.print(f"\n✓ Array fields: {len(array_fields)}")
-    console.print(f"✓ Enum-typed fields: {len(enum_fields)}")
+    console.print(f"\n[OK] Array fields: {len(array_fields)}")
+    console.print(f"[OK] Enum-typed fields: {len(enum_fields)}")
 
     # Show some array examples
     if array_fields:
@@ -160,7 +160,7 @@ def main():
         for msg_name, field_name, field_type in array_fields[:5]:
             console.print(f"  • {msg_name}.{field_name}: {field_type}")
 
-    console.print("\n[bold green]✓ All tests completed successfully![/bold green]")
+    console.print("\n[bold green][OK] All tests completed successfully![/bold green]")
 
 
 if __name__ == "__main__":

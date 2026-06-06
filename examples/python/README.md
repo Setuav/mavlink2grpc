@@ -14,9 +14,18 @@ python3 -m grpc_tools.protoc -I./proto --python_out=./generated --grpc_python_ou
 
 ## Available Examples
 
+### stream_telemetry.py
+
+Subscribes to real-time MAVLink telemetry streams (HEARTBEAT, ATTITUDE, and GLOBAL_POSITION_INT) and prints updates as they arrive.
+
+**Usage:**
+```bash
+python3 stream_telemetry.py --host localhost:50051
+```
+
 ### takeoff.py
 
-Sends a takeoff command to a MAVLink vehicle and monitors the acknowledgment.
+Sends guided takeoff commands (set GUIDED mode, arm vehicle, send takeoff command) to a MAVLink vehicle and monitors for acknowledgment messages.
 
 **Usage:**
 ```bash
@@ -25,25 +34,7 @@ python3 takeoff.py
 
 # Custom altitude
 python3 takeoff.py --altitude 20.0
-
-# Custom gRPC server address
-python3 takeoff.py --host 192.168.1.100:50051 --altitude 15.0
-
-# Custom target system/component
-python3 takeoff.py --system 1 --component 1 --altitude 10.0
 ```
-
-**Arguments:**
-- `--host`: gRPC bridge address (default: `localhost:50051`)
-- `--altitude`: Takeoff altitude in meters (default: `10.0`)
-- `--system`: Target system ID (default: `1`)
-- `--component`: Target component ID (default: `1`)
-
-**What it does:**
-1. Connects to the mavlink2grpc bridge
-2. Sends a `COMMAND_LONG` message with `MAV_CMD_NAV_TAKEOFF`
-3. Monitors for `COMMAND_ACK` response from the vehicle
-4. Displays the result (accepted/rejected)
 
 ## Running the Examples
 

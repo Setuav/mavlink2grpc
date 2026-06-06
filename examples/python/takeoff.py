@@ -58,10 +58,10 @@ def send_command(stub, target_system, target_component, command, params, command
     response = stub.SendMessage(message)
     
     if response.success:
-        print(f"✓ {command_name} command sent")
+        print(f"[OK] {command_name} command sent")
         return True
     else:
-        print(f"✗ Failed to send {command_name}: {response.error}")
+        print(f"[ERROR] Failed to send {command_name}: {response.error}")
         return False
 
 
@@ -93,14 +93,14 @@ def wait_for_ack(stub, command_name, timeout=5.0):
                 print(f"  Result: {result_str}")
                 
                 if ack.result == common_pb2.MAV_RESULT_ACCEPTED:
-                    print(f"✓ {command_name} accepted\n")
+                    print(f"[OK] {command_name} accepted\n")
                     return True
                 else:
-                    print(f"✗ {command_name} rejected: {result_str}\n")
+                    print(f"[ERROR] {command_name} rejected: {result_str}\n")
                     return False
             
             if time.time() - start_time > timeout:
-                print(f"✗ Timeout waiting for {command_name} ACK\n")
+                print(f"[ERROR] Timeout waiting for {command_name} ACK\n")
                 return False
     except KeyboardInterrupt:
         print("\nInterrupted by user")
@@ -249,10 +249,10 @@ def main():
         print("TAKEOFF command sent.")
         
     except grpc.RpcError as e:
-        print(f"✗ gRPC error: {e.code()} - {e.details()}")
+        print(f"[ERROR] gRPC error: {e.code()} - {e.details()}")
         return 1
     except Exception as e:
-        print(f"✗ Error: {e}")
+        print(f"[ERROR] Error: {e}")
         import traceback
         traceback.print_exc()
         return 1

@@ -5,24 +5,33 @@
 
 #include "Bridge.h"
 #include "mavlink/MessageConverter.h"
-#include "mavlink/UdpTransport.h"
-#include "mavlink/SerialTransport.h"
+#include <mav/TCPClient.h>
+#include <mav/TCPServer.h>
+#include <mav/UDPClient.h>
+#include <mav/UDPServer.h>
+#include <mav/Serial.h>
 #include "service/Logger.h"
 #include <sstream>
 #include <regex>
 #include <stdexcept>
+#include <vector>
+#include <unistd.h>
 
 namespace mav2grpc {
 
-std::unique_ptr<Transport> Bridge::parse_connection_url(const std::string& url) {
+std::unique_ptr<mav::NetworkInterface> Bridge::parse_connection_url(const std::string& url) {
   // URL format: protocol://[host]:port or protocol://device:baudrate
   // Examples:
   //   udp://:14550 - UDP server on port 14550
   //   udp://192.168.1.100:14550 - UDP client to 192.168.1.100:14550
+  //   tcp://:4560 - TCP server on port 4560
+  //   tcp://192.168.1.100:4560 - TCP client to 192.168.1.100:4560
   //   serial:///dev/ttyUSB0:57600 - Serial on /dev/ttyUSB0 at 57600 baud
 
   std::regex udp_server_regex(R"(udp://:(\d+))");
   std::regex udp_client_regex(R"(udp://([^:]+):(\d+))");
+  std::regex tcp_server_regex(R"(tcp://:(\d+))");
+  std::regex tcp_client_regex(R"(tcp://([^:]+):(\d+))");
   std::regex serial_regex(R"(serial://([^:]+):(\d+))");
   
   std::smatch match;
@@ -33,7 +42,7 @@ std::unique_ptr<Transport> Bridge::parse_connection_url(const std::string& url) 
     std::ostringstream oss;
     oss << "Connecting to MAVLink via UDP server on port " << port;
     Logger::Info(oss.str());
-    return std::make_unique<UdpTransport>(port);
+    return std::make_unique<mav::UDPServer>(port);
   }
 
   // UDP client (e.g., udp://192.168.1.100:14550)
@@ -41,10 +50,28 @@ std::unique_ptr<Transport> Bridge::parse_connection_url(const std::string& url) 
     std::string host = match[1];
     uint16_t port = std::stoi(match[2]);
     std::ostringstream oss;
-    oss << "Connecting to MAVLink via UDP client " << host << ":" << port;
+    oss << "Connecting to MAVLink via UDP client to " << host << ":" << port;
     Logger::Info(oss.str());
-    // UDP client support would need UdpTransport enhancement
-    throw std::runtime_error("UDP client mode not yet implemented");
+    return std::make_unique<mav::UDPClient>(host, port);
+  }
+
+  // TCP server (e.g., tcp://:4560)
+  if (std::regex_match(url, match, tcp_server_regex)) {
+    uint16_t port = std::stoi(match[1]);
+    std::ostringstream oss;
+    oss << "Connecting to MAVLink via TCP server on port " << port;
+    Logger::Info(oss.str());
+    return std::make_unique<mav::TCPServer>(port);
+  }
+
+  // TCP client (e.g., tcp://192.168.1.100:4560)
+  if (std::regex_match(url, match, tcp_client_regex)) {
+    std::string host = match[1];
+    uint16_t port = std::stoi(match[2]);
+    std::ostringstream oss;
+    oss << "Connecting to MAVLink via TCP client to " << host << ":" << port;
+    Logger::Info(oss.str());
+    return std::make_unique<mav::TCPClient>(host, port);
   }
 
   // Serial (e.g., serial:///dev/ttyUSB0:57600)
@@ -54,7 +81,7 @@ std::unique_ptr<Transport> Bridge::parse_connection_url(const std::string& url) 
     std::ostringstream oss;
     oss << "Connecting to MAVLink via serial " << device << " @ " << baudrate << " baud";
     Logger::Info(oss.str());
-    return std::make_unique<SerialTransport>(device, baudrate);
+    return std::make_unique<mav::Serial>(device, baudrate);
   }
 
   std::ostringstream oss;
@@ -66,56 +93,89 @@ Bridge::Bridge(const std::string& connection_url,
                const std::string& grpc_address,
                uint8_t system_id,
                uint8_t component_id)
-    : Bridge(parse_connection_url(connection_url), grpc_address, system_id, component_id) {
-}
-
-Bridge::Bridge(std::unique_ptr<Transport> transport,
-               const std::string& grpc_address,
-               uint8_t system_id,
-               uint8_t component_id)
     : system_id_(system_id), component_id_(component_id), running_(false) {
   
-  if (!transport) {
-    throw std::invalid_argument("Transport cannot be null");
-  }
-
   // Create router for message routing
   router_ = std::make_shared<Router>();
 
-  // Create MAVLink connection (takes ownership of transport)
-  connection_ = std::make_shared<Connection>(
-    std::move(transport), system_id, component_id
-  );
-
-  // Register callback for MAVLink messages
-  connection_->set_message_callback(
-    [this](const mavlink_message_t& msg) {
-      on_mavlink_message(msg);
+  // Find XML path
+  std::string dialect = MAVLINK_DIALECT;
+  std::string xml_filename = dialect + ".xml";
+  std::string xml_path = "";
+  std::vector<std::string> paths = {
+    "../../third_party/mavlink/message_definitions/v1.0/" + xml_filename,
+    "../third_party/mavlink/message_definitions/v1.0/" + xml_filename,
+    "third_party/mavlink/message_definitions/v1.0/" + xml_filename,
+    "../../mavlink/message_definitions/v1.0/" + xml_filename,
+    "../mavlink/message_definitions/v1.0/" + xml_filename,
+    "mavlink/message_definitions/v1.0/" + xml_filename,
+    "../third_party/libmav/tests/common.xml"
+  };
+  for (const auto& p : paths) {
+    if (access(p.c_str(), F_OK) != -1) {
+      xml_path = p;
+      break;
     }
-  );
+  }
+  if (xml_path.empty()) {
+    throw std::runtime_error("Could not find " + xml_filename + " definition file.");
+  }
+
+  message_set_ = std::make_shared<mav::MessageSet>(xml_path);
+  physical_interface_ = parse_connection_url(connection_url);
+
+  auto on_conn = [this](const std::shared_ptr<mav::Connection>& connection) {
+    Logger::Info("MAVLink connection established!");
+    active_connection_ = connection;
+
+    // Register callback for MAVLink messages
+    connection->addMessageCallback([this](const mav::Message& msg) {
+      on_mavlink_message(msg);
+    });
+  };
+
+  auto on_conn_lost = [this](const std::shared_ptr<mav::Connection>& connection) {
+    Logger::Warn("MAVLink connection lost!");
+    if (active_connection_ == connection) {
+      active_connection_.reset();
+    }
+  };
+
+  const mav::Identifier own_id{system_id, component_id};
+  runtime_ = std::make_unique<mav::NetworkRuntime>(own_id, *message_set_, *physical_interface_, on_conn, on_conn_lost);
 
   // Create gRPC service with router and send callback
   service_ = std::make_shared<MavlinkBridgeServiceImpl>(
     *router_,
     [this](const mavlink::MavlinkMessage& proto_msg) -> bool {
+      if (!active_connection_ || !active_connection_->alive()) {
+        Logger::Warn("Cannot send message: No active MAVLink connection");
+        return false;
+      }
+
       // Convert proto to MAVLink message
-      auto mav_msg = MessageConverter::from_proto(
-        proto_msg, system_id_, component_id_
-      );
+      auto mav_msg = MessageConverter::from_proto(proto_msg, *message_set_);
       if (!mav_msg) {
         Logger::Warn("Failed to convert proto message to MAVLink");
         return false;
       }
       
-      // Send via connection
-      return connection_->send_message(*mav_msg);
+      try {
+        active_connection_->send(*mav_msg);
+        return true;
+      } catch (const std::exception& e) {
+        std::ostringstream oss;
+        oss << "Failed to send message: " << e.what();
+        Logger::Error(oss.str());
+        return false;
+      }
     }
   );
 
   // Create gRPC server
   server_ = std::make_unique<Server>(service_, grpc_address);
 
-  Logger::Info("Bridge initialized");
+  Logger::Info("Bridge initialized with libmav backend");
 }
 
 Bridge::~Bridge() {
@@ -135,13 +195,6 @@ void Bridge::start() {
   // Start gRPC server
   server_->start();
 
-  // Start MAVLink connection
-  if (!connection_->start()) {
-    Logger::Error("Failed to start MAVLink connection");
-    server_->stop();
-    return;
-  }
-
   running_ = true;
   Logger::Info("Bridge started successfully");
 }
@@ -154,11 +207,13 @@ void Bridge::stop() {
 
   Logger::Info("Stopping bridge...");
 
-  // Stop MAVLink connection first
-  connection_->stop();
-
   // Stop gRPC server
   server_->stop();
+
+  // Stop libmav runtime
+  if (runtime_) {
+    runtime_->stop();
+  }
 
   running_ = false;
   Logger::Info("Bridge stopped");
@@ -178,21 +233,21 @@ bool Bridge::is_running() const {
   return running_;
 }
 
-void Bridge::on_mavlink_message(const mavlink_message_t& msg) {
+void Bridge::on_mavlink_message(const mav::Message& msg) {
   // Convert MAVLink message to proto
   auto proto_msg = MessageConverter::to_proto(msg);
   if (!proto_msg) {
     // Silently ignore unsupported messages to avoid log spam
-    // Only HEARTBEAT (msgid=0) is supported in minimal dialect
     return;
   }
   
   // Log received message
   {
     std::ostringstream oss;
-    oss << "MAVLink message received: msgid=" << static_cast<int>(msg.msgid)
-        << " from sys=" << static_cast<int>(msg.sysid)
-        << " comp=" << static_cast<int>(msg.compid);
+    oss << "MAVLink message received: msgid=" << msg.id()
+        << " (" << msg.name() << ")"
+        << " from sys=" << static_cast<int>(msg.header().systemId())
+        << " comp=" << static_cast<int>(msg.header().componentId());
     Logger::Info(oss.str());
   }
   

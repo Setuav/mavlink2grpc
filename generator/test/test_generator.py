@@ -41,7 +41,7 @@ def parse_all_dialects(parser: MAVLinkParser, dialect_names: list) -> dict:
                 dialects[name] = dialect
                 progress.update(task, advance=1)
             except Exception as e:
-                console.print(f"[red]✗ Failed to parse {name}.xml: {e}[/red]")
+                console.print(f"[red][ERROR] Failed to parse {name}.xml: {e}[/red]")
                 failed.append(name)
                 progress.update(task, advance=1)
 
@@ -65,7 +65,7 @@ def generate_all_protos(generator: ProtoGenerator, dialects: dict, output_dir: P
             generator.generate_all(dialect_list, output_dir)
             results["success"] = list(dialects.keys())
         except Exception as e:
-            console.print(f"[red]✗ Generation failed: {e}[/red]")
+            console.print(f"[red][ERROR] Generation failed: {e}[/red]")
             results["failed"] = list(dialects.keys())
 
         progress.update(task, completed=True)
@@ -143,7 +143,7 @@ def main():
     # Step 1: Use core dialects
     console.print("\n[cyan]Step 1: Testing core dialects...[/cyan]")
     dialect_names = CORE_DIALECTS
-    console.print(f"✓ Testing {len(dialect_names)} core dialects: {', '.join(dialect_names)}")
+    console.print(f"[OK] Testing {len(dialect_names)} core dialects: {', '.join(dialect_names)}")
 
     # Step 2: Parse all dialects
     console.print("\n[cyan]Step 2: Parsing all dialects...[/cyan]")
@@ -152,7 +152,7 @@ def main():
 
     if parse_failed:
         console.print(f"[yellow]⚠ {len(parse_failed)} dialects failed to parse[/yellow]")
-    console.print(f"✓ Successfully parsed {len(dialects)}/{len(dialect_names)} dialects")
+    console.print(f"[OK] Successfully parsed {len(dialects)}/{len(dialect_names)} dialects")
 
     # Step 3: Generate proto files
     console.print("\n[cyan]Step 3: Generating proto files...[/cyan]")
@@ -160,9 +160,9 @@ def main():
     gen_results = generate_all_protos(generator, dialects, output_dir)
 
     if gen_results["failed"]:
-        console.print(f"[red]✗ Failed to generate protos for {len(gen_results['failed'])} dialects[/red]")
+        console.print(f"[red][ERROR] Failed to generate protos for {len(gen_results['failed'])} dialects[/red]")
     else:
-        console.print(f"✓ Generated protos for {len(gen_results['success'])} dialects")
+        console.print(f"[OK] Generated protos for {len(gen_results['success'])} dialects")
 
     # Step 4: Validate with protoc
     console.print("\n[cyan]Step 4: Validating with protoc...[/cyan]")
@@ -188,7 +188,7 @@ def main():
                 str(len(dialect.enums)),
                 str(len(dialect.messages)),
                 f"{size:,} bytes",
-                "[green]✓ VALID[/green]"
+                "[green]VALID[/green]"
             )
 
     # Add warnings
@@ -214,7 +214,7 @@ def main():
             "-",
             "-",
             "-",
-            f"[red]✗ {error_line[:30]}...[/red]"
+            f"[red][ERROR] {error_line[:30]}...[/red]"
         )
 
     console.print(table)
@@ -240,13 +240,13 @@ def main():
     all_processed = (len(val_results["valid"]) + len(val_results["warning"])) == len(dialects)
 
     if not has_errors and all_processed and not has_warnings:
-        console.print("\n[bold green]🎉 ALL CORE DIALECTS VALID![/bold green]")
+        console.print("\n[bold green]ALL CORE DIALECTS VALID![/bold green]")
         return 0
     elif not has_errors and all_processed and has_warnings:
-        console.print("\n[bold yellow]✓ All core dialects valid (with warnings)[/bold yellow]")
+        console.print("\n[bold yellow]All core dialects valid (with warnings)[/bold yellow]")
         return 0
     else:
-        console.print("\n[bold red]✗ SOME CORE DIALECTS FAILED[/bold red]")
+        console.print("\n[bold red][ERROR] SOME CORE DIALECTS FAILED[/bold red]")
         return 1
 
 

@@ -134,14 +134,14 @@ class GRPCClient {
     async connect() {
         try {
             // Load proto file
-            const PROTO_PATH = path.join(__dirname, '..', 'proto', 'mavlink_bridge.proto');
+            const PROTO_PATH = path.join(__dirname, '..', '..', 'proto', 'mavlink_bridge.proto');
             const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
                 keepCase: true,
                 longs: String,
                 enums: String,
                 defaults: true,
                 oneofs: true,
-                includeDirs: [path.join(__dirname, '..', 'proto')]
+                includeDirs: [path.join(__dirname, '..', '..', 'proto')]
             });
 
             const proto = grpc.loadPackageDefinition(packageDefinition);

@@ -18,7 +18,7 @@ Python-based code generator that converts MAVLink XML definitions to Protocol Bu
 ### `bridge/`
 C++17 MAVLink-to-gRPC bridge that connects to MAVLink devices (UDP/Serial) and exposes real-time bidirectional message streaming via gRPC. Implements connection management, message routing, and gRPC service (`StreamMessages`, `SendMessage`). Supports MAVSDK-style connection URLs like `udp://:14550` or `serial:///dev/ttyUSB0:57600`.
 
-### `inspector/`
+### `examples/inspector/`
 QGroundControl-style web-based MAVLink inspector. Node.js backend (Express + Socket.IO) acts as gRPC client to the bridge and WebSocket server for the browser. Vanilla JavaScript frontend provides real-time message monitoring, frequency tracking, and multi-field chart visualization with Chart.js.
 
 ## Installation
@@ -38,18 +38,13 @@ cd mavlink2grpc
 # Run setup script (clones mavlink submodule, installs dependencies)
 ./setup.sh
 
-# Generate proto files and C++ converters
-cd generator
-python3 main.py
-# Select dialect: common.xml
-
-# Build bridge
-cd ../bridge/
-cmake -B build
-cmake --build build -j$(nproc)
+# Build bridge (automatically runs the python generator and compiles the project)
+mkdir build && cd build
+cmake .. -DMAVLINK_DIALECT=common
+make -j$(nproc)
 
 # Install inspector dependencies
-cd ../inspector
+cd ../examples/inspector
 npm install
 ```
 
@@ -59,15 +54,13 @@ Start px4 or any MAVLink-compatible autopilot simulator (e.g., `px4_sitl`).
 
 ### Start Bridge
 ```bash
-cd bridge/build
-./mav2grpc_bridge -c udp://:14550 -g 0.0.0.0:50051
+./build/bridge/mav2grpc_bridge -c udp://:14550 -g 0.0.0.0:50051
 # Change connection string (-c) as needed
 ```
 
 ### Start Inspector Demo
 ```bash
-cd inspector
-npm install
+cd examples/inspector
 node server.js -g localhost:50051 -p 8000
 ```
 
