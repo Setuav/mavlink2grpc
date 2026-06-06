@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            git \
+            python3 \
+            python3-pip \
+            python3-venv \
+            libgrpc++-dev \
+            libprotobuf-dev \
+            protobuf-compiler \
+            protobuf-compiler-grpc
+
+      - name: Set up Python Virtual Environment
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r generator/requirements.txt
+
+      - name: Run Generator Parser Tests
+        run: |
+          source venv/bin/activate
+          python3 generator/test/test_parser.py
+
+      - name: Run Generator Dialect & Protoc Validation Tests
+        run: |
+          source venv/bin/activate
+          python3 generator/test/test_generator.py
+
+      - name: Verify C++ Build (Dialect: common)
+        run: |
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DMAVLINK_DIALECT=common
+          cmake --build build -j$(nproc)
+
+      - name: Verify C++ Build (Dialect: minimal)
+        run: |
+          rm -rf build
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DMAVLINK_DIALECT=minimal
+          cmake --build build -j$(nproc)

@@ -37,7 +37,7 @@ def parse_all_dialects(parser: MAVLinkParser, dialect_names: list) -> dict:
 
         for name in dialect_names:
             try:
-                dialect = parser.parse_file(f"{name}.xml")
+                dialect = parser.get_flattened_dialect(name)
                 dialects[name] = dialect
                 progress.update(task, advance=1)
             except Exception as e:
@@ -132,7 +132,9 @@ def main():
     console.print(Panel.fit("Core MAVLink Dialects Test (minimal, standard, common)", style="bold blue"))
 
     # Paths
-    xml_dir = Path(__file__).parent.parent.parent / "mavlink" / "message_definitions" / "v1.0"
+    xml_dir = Path(__file__).parent.parent.parent / "third_party" / "mavlink" / "message_definitions" / "v1.0"
+    if not xml_dir.exists():
+        xml_dir = Path(__file__).parent.parent.parent / "mavlink" / "message_definitions" / "v1.0"
     template_dir = Path(__file__).parent.parent / "templates"
     output_dir = Path(__file__).parent.parent.parent / "proto"
 
