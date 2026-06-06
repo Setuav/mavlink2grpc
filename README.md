@@ -1,4 +1,7 @@
-# mavlink2grpc
+# MAVLink2gRPC
+
+![MAVLink2gRPC Banner](docs/images/mavlink2grpc_banner.png)
+
 A high-performance, native bridge and code generator that exposes the entire MAVLink protocol as type-safe gRPC services using modern C++17.
 
 Designed as a robust, type-safe alternative to [mavlink2rest](https://github.com/mavlink/mavlink2rest) for professional UAV systems.
