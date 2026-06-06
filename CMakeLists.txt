@@ -17,5 +17,8 @@ if(NOT GEN_RESULT EQUAL 0)
     message(FATAL_ERROR "MAVLink to Protobuf generation failed!")
 endif()
 
+# Enable CTest suite
+enable_testing()
+
 # Add bridge module subdirectory
 add_subdirectory(bridge)
