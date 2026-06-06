@@ -135,3 +135,53 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 else()
   target_compile_options(${PROJECT_NAME} PRIVATE -O3)
 endif()
+
+# ============================================================================
+# C++ Testing Target
+# ============================================================================
+enable_testing()
+
+add_executable(test_runner
+  test/test_runner.cc
+  test/test_router.cc
+  test/test_converter.cc
+  src/service/Router.cc
+  src/service/Logger.cc
+  src/mavlink/MessageConverter.cc
+  $<TARGET_OBJECTS:proto_lib>
+)
+
+target_include_directories(test_runner PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${GENERATED_PROTOBUF_PATH}
+  ${CMAKE_CURRENT_BINARY_DIR}/generated
+)
+
+target_include_directories(test_runner SYSTEM PRIVATE
+  ${LIBMAV_INCLUDE_DIR}
+)
+
+add_dependencies(test_runner proto_lib)
+
+target_link_libraries(test_runner PRIVATE
+  ${Protobuf_LIBRARIES}
+  ${GRPC_LIBRARIES}
+  ${GRPCPP_LIBRARIES}
+  Threads::Threads
+)
+
+set_target_properties(test_runner PROPERTIES
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED ON
+)
+
+target_compile_definitions(test_runner PRIVATE MAVLINK_DIALECT="${MAVLINK_DIALECT}")
+target_compile_options(test_runner PRIVATE -Wall -Wextra -Werror)
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_options(test_runner PRIVATE -O0 -g)
+else()
+  target_compile_options(test_runner PRIVATE -O3)
+endif()
+
+add_test(NAME bridge_tests COMMAND test_runner)
