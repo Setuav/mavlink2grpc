@@ -17,7 +17,8 @@ sudo apt-get install -y \
     python3-pip \
     libgrpc++-dev \
     libprotobuf-dev \
-    protobuf-compiler-grpc
+    protobuf-compiler-grpc \
+    nlohmann-json3-dev
 
 # Ensure git submodules are initialized and updated
 echo "-- Initializing and updating submodules..."

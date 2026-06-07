@@ -30,7 +30,8 @@ jobs:
             libgrpc++-dev \
             libprotobuf-dev \
             protobuf-compiler \
-            protobuf-compiler-grpc
+            protobuf-compiler-grpc \
+            nlohmann-json3-dev
 
       - name: Set up Python Virtual Environment
         run: |
