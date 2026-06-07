@@ -3,9 +3,11 @@
   "version": "0.0.1",
   "description": "Node.js gRPC Protocol Buffer definitions for MAVLink2gRPC",
   "main": "index.js",
+  "types": "index.d.ts",
   "files": [
     "proto",
     "index.js",
+    "index.d.ts",
     "README.md"
   ],
   "repository": {
