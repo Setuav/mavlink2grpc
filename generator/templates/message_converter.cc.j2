@@ -19,10 +19,10 @@ uint64_t MessageConverter::get_timestamp_usec() {
   return std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 }
 
-std::optional<mavlink::MavlinkMessage> 
+std::optional<mavlink2grpc::MavlinkMessage> 
 MessageConverter::to_proto(const mav::Message& mavlink_msg,
                            std::optional<uint64_t> timestamp_usec) {
-  mavlink::MavlinkMessage proto_msg;
+  mavlink2grpc::MavlinkMessage proto_msg;
 
   // Set header fields
   proto_msg.set_system_id(mavlink_msg.header().systemId());
@@ -45,12 +45,12 @@ MessageConverter::to_proto(const mav::Message& mavlink_msg,
 }
 
 std::optional<mav::Message>
-MessageConverter::from_proto(const mavlink::MavlinkMessage& proto_msg,
+MessageConverter::from_proto(const mavlink2grpc::MavlinkMessage& proto_msg,
                              const mav::MessageSet& message_set) {
   // Handle different payload types
   switch (proto_msg.payload_case()) {
 {% for msg in messages %}
-    case mavlink::MavlinkMessage::k{{ sanitize_message_name(msg.name) }}: {
+    case mavlink2grpc::MavlinkMessage::k{{ sanitize_message_name(msg.name) }}: {
       auto msg = message_set.create("{{ msg.name }}");
       if (convert_{{ msg.name|lower }}_from_proto(
             proto_msg.{{ msg.name|lower }}(), 
@@ -61,7 +61,7 @@ MessageConverter::from_proto(const mavlink::MavlinkMessage& proto_msg,
     }
 {% endfor %}
 
-    case mavlink::MavlinkMessage::PAYLOAD_NOT_SET:
+    case mavlink2grpc::MavlinkMessage::PAYLOAD_NOT_SET:
       return std::nullopt;
 
     default:
@@ -76,7 +76,7 @@ MessageConverter::from_proto(const mavlink::MavlinkMessage& proto_msg,
 
 void MessageConverter::convert_{{ msg.name|lower }}_to_proto(
     const mav::Message& mavlink_msg,
-    mavlink::MavlinkMessage& proto_msg) {
+    mavlink2grpc::MavlinkMessage& proto_msg) {
   
   // Create proto message
   auto* proto = proto_msg.mutable_{{ msg.name|lower }}();
@@ -101,7 +101,7 @@ void MessageConverter::convert_{{ msg.name|lower }}_to_proto(
     for (const auto& val : vec) {
 {% if field.type_info.is_enum %}
       proto->add_{{ sanitize_field_name(field.name) }}(
-        static_cast<mavlink::{{ msg.dialect }}::{{ field.type_info.proto_type }}>(val));
+        static_cast<mavlink2grpc::{{ msg.dialect }}::{{ field.type_info.proto_type }}>(val));
 {% else %}
       proto->add_{{ sanitize_field_name(field.name) }}(val);
 {% endif %}
@@ -112,7 +112,7 @@ void MessageConverter::convert_{{ msg.name|lower }}_to_proto(
   // Scalar field: {{ field.name }}
 {% if field.type_info.is_enum %}
   proto->set_{{ sanitize_field_name(field.name) }}(
-    static_cast<mavlink::{{ msg.dialect }}::{{ field.type_info.proto_type }}>(
+    static_cast<mavlink2grpc::{{ msg.dialect }}::{{ field.type_info.proto_type }}>(
       mavlink_msg["{{ field.name }}"].as<{{ field.type_info.cpp_type }}>()));
 {% else %}
   proto->set_{{ sanitize_field_name(field.name) }}(
@@ -123,7 +123,7 @@ void MessageConverter::convert_{{ msg.name|lower }}_to_proto(
 }
 
 bool MessageConverter::convert_{{ msg.name|lower }}_from_proto(
-    const mavlink::{{ msg.dialect }}::{{ sanitize_message_name(msg.name) }}& proto,
+    const mavlink2grpc::{{ msg.dialect }}::{{ sanitize_message_name(msg.name) }}& proto,
     mav::Message& mavlink_msg) {
   
 {% for field in msg.fields %}

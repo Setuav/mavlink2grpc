@@ -113,14 +113,14 @@ def validate_all_protos(proto_dir: Path, dialect_names: list) -> dict:
         task = progress.add_task("Validating protos...", total=len(dialect_names))
 
         for name in dialect_names:
-            proto_file = proto_dir / "mavlink" / f"{name}.proto"
+            proto_file = proto_dir / "mavlink2grpc" / "mavlink" / f"{name}.proto"
 
             if not proto_file.exists():
                 results["error"].append((name, "File not generated"))
                 progress.update(task, advance=1)
                 continue
 
-            status, message = validate_proto(proto_file, proto_dir)
+            status, message = validate_proto(proto_file, proto_dir / "mavlink2grpc")
             results[status].append((name, message))
             progress.update(task, advance=1)
 
@@ -183,7 +183,7 @@ def main():
     for name, _ in val_results["valid"]:
         if name in dialects:
             dialect = dialects[name]
-            proto_file = output_dir / "mavlink" / f"{name}.proto"
+            proto_file = output_dir / "mavlink2grpc" / "mavlink" / f"{name}.proto"
             size = proto_file.stat().st_size if proto_file.exists() else 0
             table.add_row(
                 name,
@@ -197,7 +197,7 @@ def main():
     for name, msg in val_results["warning"]:
         if name in dialects:
             dialect = dialects[name]
-            proto_file = output_dir / "mavlink" / f"{name}.proto"
+            proto_file = output_dir / "mavlink2grpc" / "mavlink" / f"{name}.proto"
             size = proto_file.stat().st_size if proto_file.exists() else 0
             warning_line = msg.split('\n')[0] if msg else "Unknown warning"
             table.add_row(

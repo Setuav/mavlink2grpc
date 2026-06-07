@@ -134,7 +134,7 @@ class GRPCClient {
     async connect() {
         try {
             // Load proto file
-            const PROTO_PATH = path.join(__dirname, '..', '..', 'proto', 'mavlink_bridge.proto');
+            const PROTO_PATH = path.join(__dirname, '..', '..', 'proto', 'mavlink2grpc', 'mavlink2grpc.proto');
             const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
                 keepCase: true,
                 longs: String,
@@ -147,7 +147,7 @@ class GRPCClient {
             const proto = grpc.loadPackageDefinition(packageDefinition);
             
             // Create client - note: service name is MavlinkBridge (capital B in proto, but proto loader makes it camelCase)
-            this.client = new proto.mavlink.MavlinkBridge(
+            this.client = new proto.mavlink2grpc.MavlinkBridge(
                 this.serverAddress,
                 grpc.credentials.createInsecure()
             );

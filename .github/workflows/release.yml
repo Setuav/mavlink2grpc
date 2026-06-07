@@ -86,12 +86,12 @@ jobs:
             --proto_path=proto \
             --python_out=clients/python/src \
             --grpc_python_out=clients/python/src \
-            proto/mavlink_bridge.proto proto/mavlink/common.proto
+            proto/mavlink2grpc/mavlink2grpc.proto proto/mavlink2grpc/mavlink/common.proto
             
           # Add __init__.py files to make it a package
-          touch clients/python/src/__init__.py
-          mkdir -p clients/python/src/mavlink
-          touch clients/python/src/mavlink/__init__.py
+          mkdir -p clients/python/src/mavlink2grpc/mavlink
+          touch clients/python/src/mavlink2grpc/__init__.py
+          touch clients/python/src/mavlink2grpc/mavlink/__init__.py
 
       - name: Build Python Package
         run: |
@@ -132,9 +132,9 @@ jobs:
           python3 generator/main.py --dialect common --proto-out proto --cpp-out bridge/src/mavlink
           
           # Copy proto files to npm package folder
-          mkdir -p clients/node/proto/mavlink
-          cp proto/mavlink_bridge.proto clients/node/proto/
-          cp proto/mavlink/*.proto clients/node/proto/mavlink/
+          mkdir -p clients/node/proto/mavlink2grpc/mavlink
+          cp proto/mavlink2grpc/mavlink2grpc.proto clients/node/proto/mavlink2grpc/
+          cp proto/mavlink2grpc/mavlink/*.proto clients/node/proto/mavlink2grpc/mavlink/
 
       - name: Publish to npm
         env:

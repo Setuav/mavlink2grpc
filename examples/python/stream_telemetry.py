@@ -14,9 +14,9 @@ from pathlib import Path
 # Add generated proto files to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "generated"))
 
-import mavlink_bridge_pb2
-import mavlink_bridge_pb2_grpc
-from mavlink import common_pb2
+from mavlink2grpc import mavlink2grpc_pb2
+from mavlink2grpc import mavlink2grpc_pb2_grpc
+from mavlink2grpc.mavlink import common_pb2
 
 
 def main():
@@ -32,14 +32,14 @@ def main():
     # 1. Connect to gRPC channel
     print(f"Connecting to gRPC bridge at {args.host}...")
     channel = grpc.insecure_channel(args.host)
-    stub = mavlink_bridge_pb2_grpc.MavlinkBridgeStub(channel)
+    stub = mavlink2grpc_pb2_grpc.MavlinkBridgeStub(channel)
 
     # 2. Define message filters
     # We filter by message IDs:
     #   0  = HEARTBEAT
     #   30 = ATTITUDE
     #   33 = GLOBAL_POSITION_INT
-    stream_filter = mavlink_bridge_pb2.StreamFilter(
+    stream_filter = mavlink2grpc_pb2.StreamFilter(
         system_id=0,       # 0 means listen to all systems
         component_id=0,    # 0 means listen to all components
         message_ids=[0, 30, 33]

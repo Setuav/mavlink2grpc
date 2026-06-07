@@ -20,9 +20,9 @@ from pathlib import Path
 # Add generated proto files to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "generated"))
 
-import mavlink_bridge_pb2
-import mavlink_bridge_pb2_grpc
-from mavlink import common_pb2
+from mavlink2grpc import mavlink2grpc_pb2
+from mavlink2grpc import mavlink2grpc_pb2_grpc
+from mavlink2grpc.mavlink import common_pb2
 
 
 def send_command(stub, target_system, target_component, command, params, command_name="command"):
@@ -42,7 +42,7 @@ def send_command(stub, target_system, target_component, command, params, command
         param7=params[6]
     )
     
-    message = mavlink_bridge_pb2.MavlinkMessage(
+    message = mavlink2grpc_pb2.MavlinkMessage(
         system_id=254,
         component_id=190,
         message_id=76,
@@ -68,7 +68,7 @@ def send_command(stub, target_system, target_component, command, params, command
 def wait_for_ack(stub, command_name, timeout=5.0):
     """Wait for COMMAND_ACK"""
     
-    stream_filter = mavlink_bridge_pb2.StreamFilter(
+    stream_filter = mavlink2grpc_pb2.StreamFilter(
         system_id=0,
         component_id=0,
         message_ids=[77]  # COMMAND_ACK
@@ -135,7 +135,7 @@ def arm_vehicle(stub, target_system, target_component, force=False):
 
 def get_current_position(stub, timeout=5.0):
     """Get current latitude and longitude from vehicle (GLOBAL_POSITION_INT)"""
-    stream_filter = mavlink_bridge_pb2.StreamFilter(
+    stream_filter = mavlink2grpc_pb2.StreamFilter(
         system_id=0,
         component_id=0,
         message_ids=[33]  # GLOBAL_POSITION_INT
@@ -162,7 +162,7 @@ def get_current_altitude(stub, timeout=5.0):
     """Get current altitude from vehicle"""
     
     # Stream GLOBAL_POSITION_INT messages
-    stream_filter = mavlink_bridge_pb2.StreamFilter(
+    stream_filter = mavlink2grpc_pb2.StreamFilter(
         system_id=0,
         component_id=0,
         message_ids=[33]  # GLOBAL_POSITION_INT
@@ -228,7 +228,7 @@ def main():
     
     print(f"Connecting: {args.host}")
     channel = grpc.insecure_channel(args.host)
-    stub = mavlink_bridge_pb2_grpc.MavlinkBridgeStub(channel)
+    stub = mavlink2grpc_pb2_grpc.MavlinkBridgeStub(channel)
     
     try:
         # Get current altitude first

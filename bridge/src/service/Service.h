@@ -12,7 +12,7 @@
 
 #include "Router.h"
 
-#include <mavlink_bridge.grpc.pb.h>
+#include <mavlink2grpc/mavlink2grpc.grpc.pb.h>
 #include <grpcpp/grpcpp.h>
 
 #include <memory>
@@ -32,7 +32,7 @@ namespace mavlink2grpc {
  *
  * Thread-safe and supports multiple concurrent clients.
  */
-class MavlinkBridgeServiceImpl final : public mavlink::MavlinkBridge::Service {
+class MavlinkBridgeServiceImpl final : public mavlink2grpc::MavlinkBridge::Service {
 public:
   /**
    * @brief Callback type for sending MAVLink messages.
@@ -40,7 +40,7 @@ public:
    * @param msg Proto message to convert and send
    * @return true if sent successfully, false otherwise
    */
-  using SendMessageCallback = std::function<bool(const mavlink::MavlinkMessage&)>;
+  using SendMessageCallback = std::function<bool(const mavlink2grpc::MavlinkMessage&)>;
 
   /**
    * @brief Construct service with router and send callback.
@@ -65,8 +65,8 @@ public:
    */
   grpc::Status StreamMessages(
     grpc::ServerContext* context,
-    const mavlink::StreamFilter* request,
-    grpc::ServerWriter<mavlink::MavlinkMessage>* writer) override;
+    const mavlink2grpc::StreamFilter* request,
+    grpc::ServerWriter<mavlink2grpc::MavlinkMessage>* writer) override;
 
   /**
    * @brief Send MAVLink message to connected system.
@@ -80,8 +80,8 @@ public:
    */
   grpc::Status SendMessage(
     grpc::ServerContext* context,
-    const mavlink::MavlinkMessage* request,
-    mavlink::SendResponse* response) override;
+    const mavlink2grpc::MavlinkMessage* request,
+    mavlink2grpc::SendResponse* response) override;
 
   /**
    * @brief Shutdown the service and notify all active streams.

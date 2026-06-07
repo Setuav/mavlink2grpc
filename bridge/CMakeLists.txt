@@ -27,11 +27,12 @@ set(PROTO_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../proto)
 set(GENERATED_PROTOBUF_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../generated)
 
 file(MAKE_DIRECTORY ${GENERATED_PROTOBUF_PATH})
-file(MAKE_DIRECTORY ${GENERATED_PROTOBUF_PATH}/mavlink)
+file(MAKE_DIRECTORY ${GENERATED_PROTOBUF_PATH}/mavlink2grpc)
+file(MAKE_DIRECTORY ${GENERATED_PROTOBUF_PATH}/mavlink2grpc/mavlink)
 
 # Collect all proto files
-file(GLOB MAVLINK_PROTO_FILES "${PROTO_PATH}/mavlink/*.proto")
-file(GLOB ROOT_PROTO_FILES "${PROTO_PATH}/*.proto")
+file(GLOB MAVLINK_PROTO_FILES "${PROTO_PATH}/mavlink2grpc/mavlink/*.proto")
+file(GLOB ROOT_PROTO_FILES "${PROTO_PATH}/mavlink2grpc/*.proto")
 
 # Combine all proto files and their outputs
 set(ALL_PROTO_FILES ${MAVLINK_PROTO_FILES} ${ROOT_PROTO_FILES})

@@ -10,7 +10,7 @@
 
 namespace mavlink2grpc {
 
-bool StreamSubscription::matches(const mavlink::MavlinkMessage& msg) const {
+bool StreamSubscription::matches(const mavlink2grpc::MavlinkMessage& msg) const {
   // Check system ID filter (0 = all systems)
   if (filter.system_id() != 0 && msg.system_id() != filter.system_id()) {
     return false;
@@ -39,7 +39,7 @@ bool StreamSubscription::matches(const mavlink::MavlinkMessage& msg) const {
 }
 
 uint64_t Router::subscribe(
-    const mavlink::StreamFilter& filter,
+    const mavlink2grpc::StreamFilter& filter,
     StreamSubscription::WriteCallback write_func) {
   
   std::lock_guard<std::mutex> lock(subscriptions_mutex_);
@@ -85,7 +85,7 @@ bool Router::unsubscribe(uint64_t subscription_id) {
   return false;
 }
 
-size_t Router::route_message(const mavlink::MavlinkMessage& msg) {
+size_t Router::route_message(const mavlink2grpc::MavlinkMessage& msg) {
   std::lock_guard<std::mutex> lock(subscriptions_mutex_);
 
   size_t delivered = 0;
