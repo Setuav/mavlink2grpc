@@ -4,7 +4,7 @@
 # CMakeLists.txt for bridge module
 
 cmake_minimum_required(VERSION 3.10)
-project(mavlink2grpc VERSION 0.0.1 LANGUAGES CXX)
+project(mavlink2grpc VERSION 0.1.0 LANGUAGES CXX)
 
 # Configure Version.h using project version
 configure_file(

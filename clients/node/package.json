@@ -1,6 +1,6 @@
 {
   "name": "@setuav/mavlink2grpc-proto",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Node.js gRPC Protocol Buffer definitions for MAVLink2gRPC",
   "main": "index.js",
   "types": "index.d.ts",
