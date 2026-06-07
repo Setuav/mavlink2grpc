@@ -68,10 +68,12 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Python Dependencies
+      - name: Set up Python Virtual Environment
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install grpcio-tools build twine
+          python3 -m venv venv
+          ./venv/bin/pip install -r generator/requirements.txt
+          ./venv/bin/pip install grpcio-tools build twine
+          echo "$GITHUB_WORKSPACE/venv/bin" >> $GITHUB_PATH
 
       - name: Generate Protobuf Python Stubs
         run: |
@@ -118,10 +120,15 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Set up Python Virtual Environment
+        run: |
+          python3 -m venv venv
+          ./venv/bin/pip install -r generator/requirements.txt
+          echo "$GITHUB_WORKSPACE/venv/bin" >> $GITHUB_PATH
+
       - name: Generate Protobuf Definition Files
         run: |
           # Generate proto files
-          python3 -m pip install -r generator/requirements.txt
           python3 generator/main.py --dialect common --proto-out proto --cpp-out bridge/src/mavlink
           
           # Copy proto files to npm package folder
