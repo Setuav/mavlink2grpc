@@ -1,0 +1,25 @@
+{
+  "name": "mavlink2grpc-proto",
+  "version": "0.0.1",
+  "description": "Node.js gRPC Protocol Buffer definitions for MAVLink2gRPC",
+  "main": "index.js",
+  "files": [
+    "proto",
+    "index.js",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Setuav/mavlink2grpc.git"
+  },
+  "keywords": [
+    "mavlink",
+    "grpc",
+    "protobuf",
+    "uorb",
+    "drone",
+    "px4"
+  ],
+  "author": "Hüseyin Karakaya",
+  "license": "MIT"
+}

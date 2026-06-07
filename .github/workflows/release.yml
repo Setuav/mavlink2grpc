@@ -1,0 +1,138 @@
+name: CD / Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release-cpp:
+    name: Build & Release C++ Binary
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            git \
+            python3 \
+            python3-pip \
+            python3-venv \
+            libgrpc++-dev \
+            libprotobuf-dev \
+            protobuf-compiler \
+            protobuf-compiler-grpc
+
+      - name: Set up Python Virtual Environment
+        run: |
+          python3 -m venv venv
+          ./venv/bin/pip install -r generator/requirements.txt
+          echo "$GITHUB_WORKSPACE/venv/bin" >> $GITHUB_PATH
+
+      - name: Configure and Build (Release Mode)
+        run: |
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DMAVLINK_DIALECT=common
+          cmake --build build -j$(nproc)
+
+      - name: Create Release Tarball
+        run: |
+          mkdir -p release_bin
+          cp build/bridge/mavlink2grpc release_bin/
+          tar -czf mavlink2grpc-linux-amd64.tar.gz -C release_bin mavlink2grpc
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: mavlink2grpc-linux-amd64.tar.gz
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-python:
+    name: Publish Python Package to PyPI
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install grpcio-tools build twine
+
+      - name: Generate Protobuf Python Stubs
+        run: |
+          # Generate the main common proto files
+          python3 generator/main.py --dialect common --proto-out proto --cpp-out bridge/src/mavlink
+          
+          # Compile the proto files into python package
+          mkdir -p clients/python/src
+          python3 -m grpc_tools.protoc \
+            --proto_path=proto \
+            --python_out=clients/python/src \
+            --grpc_python_out=clients/python/src \
+            proto/mavlink_bridge.proto proto/mavlink/common.proto
+            
+          # Add __init__.py files to make it a package
+          touch clients/python/src/__init__.py
+          mkdir -p clients/python/src/mavlink
+          touch clients/python/src/mavlink/__init__.py
+
+      - name: Build Python Package
+        run: |
+          cd clients/python
+          python3 -m build
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          cd clients/python
+          python3 -m twine upload dist/*
+
+  publish-node:
+    name: Publish Node.js Package to npm
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate Protobuf Definition Files
+        run: |
+          # Generate proto files
+          python3 -m pip install -r generator/requirements.txt
+          python3 generator/main.py --dialect common --proto-out proto --cpp-out bridge/src/mavlink
+          
+          # Copy proto files to npm package folder
+          mkdir -p clients/node/proto/mavlink
+          cp proto/mavlink_bridge.proto clients/node/proto/
+          cp proto/mavlink/*.proto clients/node/proto/mavlink/
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd clients/node
+          npm config set //registry.npmjs.org/:_authToken "${NODE_AUTH_TOKEN}"
+          npm publish --access public
