@@ -6,6 +6,16 @@ A high-performance, native bridge and code generator that exposes the entire MAV
 
 Designed as a robust, type-safe alternative to [mavlink2rest](https://github.com/mavlink/mavlink2rest) for professional UAV systems.
 
+## Documentation
+Visit the official documentation site at **[setuav.github.io/mavlink2grpc](https://setuav.github.io/mavlibnk2grpc/)**.
+
+Detailed documentation is also available locally under the `docs/` folder:
+- [Getting Started Guide](docs/getting_started.md)
+- [Architecture & Design](docs/architecture.md)
+- [gRPC API Reference](docs/api_reference.md)
+- [Client Libraries](docs/client_libraries.md)
+- [Developer & Testing Guide](docs/developer_guide.md)
+
 ## Features
 * **Schema-First:** Auto-generates Protobuf definitions (`.proto`) directly from MAVLink XMLs.
 * **High Performance:** C++17 runtime bridge designed for low latency and efficient resource usage.

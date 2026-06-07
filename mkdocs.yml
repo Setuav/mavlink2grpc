@@ -1,0 +1,63 @@
+site_name: MAVLink2gRPC
+site_description: High-performance, native MAVLink-to-gRPC bridge and code generator using C++17
+site_author: Hüseyin Karakaya
+repo_url: https://github.com/Setuav/mavlink2grpc
+repo_name: Setuav/mavlink2grpc
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - User Guide:
+      - Home: index.md
+      - Getting Started: getting_started.md
+      - API Reference: api_reference.md
+      - Client Libraries: client_libraries.md
+  - Developer Guide:
+      - Architecture: architecture.md
+      - Development & Testing: developer_guide.md

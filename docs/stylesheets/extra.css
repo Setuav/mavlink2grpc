@@ -1,0 +1,41 @@
+/* Light theme styles */
+[data-md-color-scheme="default"] .node.genStyle rect {
+  fill: #e3f2fd !important;
+  stroke: #1565c0 !important;
+}
+[data-md-color-scheme="default"] .node.genStyle .label,
+[data-md-color-scheme="default"] .node.genStyle span,
+[data-md-color-scheme="default"] .node.genStyle div {
+  color: #0d47a1 !important;
+}
+
+[data-md-color-scheme="default"] .node.runStyle rect {
+  fill: #f1f8e9 !important;
+  stroke: #558b2f !important;
+}
+[data-md-color-scheme="default"] .node.runStyle .label,
+[data-md-color-scheme="default"] .node.runStyle span,
+[data-md-color-scheme="default"] .node.runStyle div {
+  color: #1b5e20 !important;
+}
+
+/* Dark theme styles */
+[data-md-color-scheme="slate"] .node.genStyle rect {
+  fill: #1e3a8a !important; /* Dark blue background */
+  stroke: #93c5fd !important; /* Light blue stroke */
+}
+[data-md-color-scheme="slate"] .node.genStyle .label,
+[data-md-color-scheme="slate"] .node.genStyle span,
+[data-md-color-scheme="slate"] .node.genStyle div {
+  color: #e0f2fe !important; /* Very light blue text */
+}
+
+[data-md-color-scheme="slate"] .node.runStyle rect {
+  fill: #14532d !important; /* Dark green background */
+  stroke: #86efac !important; /* Light green stroke */
+}
+[data-md-color-scheme="slate"] .node.runStyle .label,
+[data-md-color-scheme="slate"] .node.runStyle span,
+[data-md-color-scheme="slate"] .node.runStyle div {
+  color: #f0fdf4 !important; /* Very light green text */
+}
