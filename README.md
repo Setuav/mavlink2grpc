@@ -7,7 +7,7 @@ A high-performance, native bridge and code generator that exposes the entire MAV
 Designed as a robust, type-safe alternative to [mavlink2rest](https://github.com/mavlink/mavlink2rest) for professional UAV systems.
 
 ## Documentation
-Visit the official documentation site at **[setuav.github.io/mavlink2grpc](https://setuav.github.io/mavlibnk2grpc/)**.
+Visit the official documentation site at **[setuav.github.io/mavlink2grpc](https://setuav.github.io/mavlink2grpc/)**.
 
 Detailed documentation is also available locally under the `docs/` folder:
 - [Getting Started Guide](docs/getting_started.md)
