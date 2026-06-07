@@ -1,5 +1,7 @@
 # MAVLink2gRPC
 
+![MAVLink2gRPC Banner](images/mavlink2grpc_banner.png)
+
 Welcome to the official documentation for **MAVLink2gRPC** — a high-performance, native bridge and code generator that exposes the entire MAVLink protocol as type-safe gRPC services using modern C++17.
 
 MAVLink2gRPC is designed as a robust, type-safe alternative to REST-based bridges for professional UAV and robotics systems where low latency, low resource footprint, and compile-time API safety are critical.
