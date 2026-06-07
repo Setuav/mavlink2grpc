@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "proto:generate": "grpc_tools_node_protoc --js_out=import_style=commonjs,binary:./generated --grpc_out=grpc_js:./generated --proto_path=../proto ../proto/mavlink_bridge.proto ../proto/mavlink/common.proto"
+    "proto:generate": "grpc_tools_node_protoc --js_out=import_style=commonjs,binary:./generated --grpc_out=grpc_js:./generated --proto_path=../proto ../proto/mavlink2grpc/mavlink2grpc.proto ../proto/mavlink2grpc/mavlink/common.proto"
   },
   "keywords": [
     "mavlink",

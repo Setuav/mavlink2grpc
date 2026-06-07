@@ -19,8 +19,8 @@ MavlinkBridgeServiceImpl::MavlinkBridgeServiceImpl(
 
 grpc::Status MavlinkBridgeServiceImpl::StreamMessages(
     grpc::ServerContext* context,
-    const mavlink::StreamFilter* request,
-    grpc::ServerWriter<mavlink::MavlinkMessage>* writer) {
+    const mavlink2grpc::StreamFilter* request,
+    grpc::ServerWriter<mavlink2grpc::MavlinkMessage>* writer) {
   
   {
     std::ostringstream oss;
@@ -33,7 +33,7 @@ grpc::Status MavlinkBridgeServiceImpl::StreamMessages(
   // Subscribe to router with filter
   uint64_t sub_id = router_.subscribe(
     *request,
-    [writer](const mavlink::MavlinkMessage& msg) -> bool {
+    [writer](const mavlink2grpc::MavlinkMessage& msg) -> bool {
       // Write to gRPC stream
       return writer->Write(msg);
     }
@@ -62,11 +62,11 @@ grpc::Status MavlinkBridgeServiceImpl::StreamMessages(
 
 grpc::Status MavlinkBridgeServiceImpl::SendMessage(
     grpc::ServerContext* /* context */,
-    const mavlink::MavlinkMessage* request,
-    mavlink::SendResponse* response) {
+    const mavlink2grpc::MavlinkMessage* request,
+    mavlink2grpc::SendResponse* response) {
   
   // Validate request has payload
-  if (request->payload_case() == mavlink::MavlinkMessage::PAYLOAD_NOT_SET) {
+  if (request->payload_case() == mavlink2grpc::MavlinkMessage::PAYLOAD_NOT_SET) {
     response->set_success(false);
     response->set_error("No payload in message");
     Logger::Warn("SendMessage RPC failed: No payload");

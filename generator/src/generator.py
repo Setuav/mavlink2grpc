@@ -123,12 +123,12 @@ class ProtoGenerator:
 
         # Generate individual dialect protos
         for dialect in dialects:
-            proto_file = output_dir / "mavlink" / f"{dialect.name}.proto"
+            proto_file = output_dir / "mavlink2grpc" / "mavlink" / f"{dialect.name}.proto"
             self.generate_dialect_proto(dialect, proto_file)
             dialect_dict[dialect.name] = dialect
 
         # Generate bridge service proto
-        bridge_file = output_dir / "mavlink_bridge.proto"
+        bridge_file = output_dir / "mavlink2grpc" / "mavlink2grpc.proto"
         self.generate_bridge_service(dialect_dict, bridge_file)
 
         print(f"\n[OK] Generated {len(dialects)} dialect proto(s) + 1 bridge service")

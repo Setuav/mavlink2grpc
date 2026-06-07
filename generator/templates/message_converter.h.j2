@@ -10,9 +10,9 @@
 
 #include <mav/Message.h>
 #include <mav/MessageSet.h>
-#include <mavlink_bridge.pb.h>
+#include <mavlink2grpc/mavlink2grpc.pb.h>
 {% for dialect_name in dialect_names %}
-#include <mavlink/{{ dialect_name }}.pb.h>
+#include <mavlink2grpc/mavlink/{{ dialect_name }}.pb.h>
 {% endfor %}
 
 #include <optional>
@@ -31,7 +31,7 @@ public:
   /**
    * @brief Converts libmav Message to Protocol Buffer.
    */
-  static std::optional<mavlink::MavlinkMessage> 
+  static std::optional<mavlink2grpc::MavlinkMessage> 
   to_proto(const mav::Message& mavlink_msg,
            std::optional<uint64_t> timestamp_usec = std::nullopt);
 
@@ -39,7 +39,7 @@ public:
    * @brief Converts Protocol Buffer message to libmav Message.
    */
   static std::optional<mav::Message>
-  from_proto(const mavlink::MavlinkMessage& proto_msg,
+  from_proto(const mavlink2grpc::MavlinkMessage& proto_msg,
              const mav::MessageSet& message_set);
 
 private:
@@ -49,10 +49,10 @@ private:
 {% for msg in messages %}
   static void convert_{{ msg.name|lower }}_to_proto(
     const mav::Message& mavlink_msg,
-    mavlink::MavlinkMessage& proto_msg);
+    mavlink2grpc::MavlinkMessage& proto_msg);
 
   static bool convert_{{ msg.name|lower }}_from_proto(
-    const mavlink::{{ msg.dialect }}::{{ sanitize_message_name(msg.name) }}& proto,
+    const mavlink2grpc::{{ msg.dialect }}::{{ sanitize_message_name(msg.name) }}& proto,
     mav::Message& mavlink_msg);
 {% endfor %}
 };

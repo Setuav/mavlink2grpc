@@ -3,7 +3,7 @@
  */
 
 /**
- * Path to the main MAVLink bridge proto definition file (mavlink_bridge.proto)
+ * Path to the main MAVLink bridge proto definition file (mavlink2grpc.proto)
  */
 export const protoPath: string;
 

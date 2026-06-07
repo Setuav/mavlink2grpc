@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <mavlink_bridge.pb.h>
+#include <mavlink2grpc/mavlink2grpc.pb.h>
 
 #include <vector>
 #include <mutex>
@@ -26,11 +26,11 @@ namespace mavlink2grpc {
  * optional filtering by system ID, component ID, and message IDs.
  */
 struct StreamSubscription {
-  using WriteCallback = std::function<bool(const mavlink::MavlinkMessage&)>;
+  using WriteCallback = std::function<bool(const mavlink2grpc::MavlinkMessage&)>;
 
   uint64_t id;                           ///< Unique subscription ID
   WriteCallback write_func;              ///< Function to write message to stream
-  mavlink::StreamFilter filter;          ///< Filter criteria
+  mavlink2grpc::StreamFilter filter;          ///< Filter criteria
   bool active;                           ///< Is subscription still active
 
   /**
@@ -39,7 +39,7 @@ struct StreamSubscription {
    * @param msg Message to check
    * @return true if message passes filter, false otherwise
    */
-  bool matches(const mavlink::MavlinkMessage& msg) const;
+  bool matches(const mavlink2grpc::MavlinkMessage& msg) const;
 };
 
 /**
@@ -87,7 +87,7 @@ public:
    * @return Subscription ID (use for unsubscribe)
    */
   uint64_t subscribe(
-    const mavlink::StreamFilter& filter,
+    const mavlink2grpc::StreamFilter& filter,
     StreamSubscription::WriteCallback write_func);
 
   /**
@@ -107,7 +107,7 @@ public:
    * @param msg Message to route
    * @return Number of subscribers that received the message
    */
-  size_t route_message(const mavlink::MavlinkMessage& msg);
+  size_t route_message(const mavlink2grpc::MavlinkMessage& msg);
 
   /**
    * @brief Get number of active subscriptions.

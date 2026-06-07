@@ -19,12 +19,12 @@ void test_router_basic() {
   TEST_ASSERT(router.subscription_count() == 0);
 
   // Subscribe client 1 with no filters (system_id=0, component_id=0)
-  mavlink::StreamFilter filter1;
+  mavlink2grpc::StreamFilter filter1;
   filter1.set_system_id(0);
   filter1.set_component_id(0);
 
   size_t client1_received = 0;
-  uint64_t sub1 = router.subscribe(filter1, [&](const mavlink::MavlinkMessage&) {
+  uint64_t sub1 = router.subscribe(filter1, [&](const mavlink2grpc::MavlinkMessage&) {
     client1_received++;
     return true;
   });
@@ -33,7 +33,7 @@ void test_router_basic() {
   TEST_ASSERT(router.subscription_count() == 1);
 
   // Send a message
-  mavlink::MavlinkMessage msg1;
+  mavlink2grpc::MavlinkMessage msg1;
   msg1.set_system_id(1);
   msg1.set_component_id(1);
   msg1.set_message_id(0); // HEARTBEAT
@@ -59,19 +59,19 @@ void test_router_filters() {
   Router router;
 
   // Filter for system 1, component 1, message 30 (ATTITUDE) only
-  mavlink::StreamFilter filter;
+  mavlink2grpc::StreamFilter filter;
   filter.set_system_id(1);
   filter.set_component_id(1);
   filter.add_message_ids(30);
 
   size_t received = 0;
-  router.subscribe(filter, [&](const mavlink::MavlinkMessage&) {
+  router.subscribe(filter, [&](const mavlink2grpc::MavlinkMessage&) {
     received++;
     return true;
   });
 
   // Message 1: Matches all
-  mavlink::MavlinkMessage msg1;
+  mavlink2grpc::MavlinkMessage msg1;
   msg1.set_system_id(1);
   msg1.set_component_id(1);
   msg1.set_message_id(30);
@@ -79,7 +79,7 @@ void test_router_filters() {
   TEST_ASSERT(received == 1);
 
   // Message 2: Different system ID (2)
-  mavlink::MavlinkMessage msg2;
+  mavlink2grpc::MavlinkMessage msg2;
   msg2.set_system_id(2);
   msg2.set_component_id(1);
   msg2.set_message_id(30);
@@ -87,7 +87,7 @@ void test_router_filters() {
   TEST_ASSERT(received == 1); // shouldn't increase
 
   // Message 3: Different component ID (2)
-  mavlink::MavlinkMessage msg3;
+  mavlink2grpc::MavlinkMessage msg3;
   msg3.set_system_id(1);
   msg3.set_component_id(2);
   msg3.set_message_id(30);
@@ -95,7 +95,7 @@ void test_router_filters() {
   TEST_ASSERT(received == 1); // shouldn't increase
 
   // Message 4: Different message ID (0 - HEARTBEAT)
-  mavlink::MavlinkMessage msg4;
+  mavlink2grpc::MavlinkMessage msg4;
   msg4.set_system_id(1);
   msg4.set_component_id(1);
   msg4.set_message_id(0);
@@ -109,17 +109,17 @@ void test_router_cleanup() {
   std::cout << "Running test_router_cleanup..." << std::endl;
   Router router;
 
-  mavlink::StreamFilter filter;
+  mavlink2grpc::StreamFilter filter;
   
   // Client whose write fails (simulates disconnected client)
-  router.subscribe(filter, [](const mavlink::MavlinkMessage&) {
+  router.subscribe(filter, [](const mavlink2grpc::MavlinkMessage&) {
     return false; // write failed
   });
 
   TEST_ASSERT(router.subscription_count() == 1);
 
   // Route a message - this will trigger write failure and mark inactive
-  mavlink::MavlinkMessage msg;
+  mavlink2grpc::MavlinkMessage msg;
   size_t routed = router.route_message(msg);
   
   TEST_ASSERT(routed == 0);

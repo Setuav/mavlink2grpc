@@ -9,7 +9,7 @@ Python examples demonstrating how to use the mavlink2grpc bridge.
 pip install grpcio grpcio-tools
 
 # Create python files from generated protos
-python3 -m grpc_tools.protoc -I./proto --python_out=./generated --grpc_python_out=./generated ./proto/mavlink_bridge.proto ./proto/mavlink/common.proto
+python3 -m grpc_tools.protoc -I./proto --python_out=./generated --grpc_python_out=./generated ./proto/mavlink2grpc/mavlink2grpc.proto ./proto/mavlink2grpc/mavlink/common.proto
 ```
 
 ## Available Examples

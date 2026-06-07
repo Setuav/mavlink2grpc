@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package mavlink.{{ dialect.name }};
+package mavlink2grpc.{{ dialect.name }};
 
 option cc_enable_arenas = true;
-option go_package = "github.com/youruser/mavlink2grpc/gen/go/mavlink/{{ dialect.name }}";
-option java_package = "com.mavlink.{{ dialect.name }}";
+option go_package = "github.com/youruser/mavlink2grpc/gen/go/mavlink2grpc/{{ dialect.name }}";
+option java_package = "com.mavlink2grpc.{{ dialect.name }}";
 option java_outer_classname = "{{ dialect.name | title }}Proto";
 
 // Generated from {{ dialect.name }}.xml

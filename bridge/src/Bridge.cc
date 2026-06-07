@@ -147,7 +147,7 @@ Bridge::Bridge(const std::string& connection_url,
   // Create gRPC service with router and send callback
   service_ = std::make_shared<MavlinkBridgeServiceImpl>(
     *router_,
-    [this](const mavlink::MavlinkMessage& proto_msg) -> bool {
+    [this](const mavlink2grpc::MavlinkMessage& proto_msg) -> bool {
       if (!active_connection_ || !active_connection_->alive()) {
         Logger::Warn("Cannot send message: No active MAVLink connection");
         return false;
