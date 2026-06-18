@@ -7,6 +7,11 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
+  logo: images/setuav_logo.png
+  favicon: images/setuav_logo.png
+  font:
+    text: Ubuntu
+    code: Ubuntu Mono
   palette:
     # Palette toggle for light mode
     - media: "(prefers-color-scheme: light)"

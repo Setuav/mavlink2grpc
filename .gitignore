@@ -3,6 +3,7 @@ build/
 ./mavlink/
 generated/
 ignore.*
+site/
 
 # Logs and temporary files
 *.log
