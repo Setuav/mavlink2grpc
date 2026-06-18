@@ -5,7 +5,6 @@
 [![Release](https://github.com/Setuav/mavlink2grpc/actions/workflows/release.yml/badge.svg)](https://github.com/Setuav/mavlink2grpc/actions/workflows/release.yml)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://setuav.github.io/mavlink2grpc/)
 [![PyPI](https://img.shields.io/pypi/v/mavlink2grpc-proto)](https://pypi.org/project/mavlink2grpc-proto/)
-[![Python versions](https://img.shields.io/pypi/pyversions/mavlink2grpc-proto)](https://pypi.org/project/mavlink2grpc-proto/)
 [![npm](https://img.shields.io/npm/v/%40setuav%2Fmavlink2grpc-proto)](https://www.npmjs.com/package/@setuav/mavlink2grpc-proto)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -40,7 +39,7 @@ pip install mavlink2grpc-proto
 Node.js Protocol Buffer definitions:
 
 ```bash
-npm install /mavlink2grpc-proto
+npm install @setuav/mavlink2grpc-proto
 ```
 
 ## Features
