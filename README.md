@@ -1,20 +1,47 @@
-# MAVLink2gRPC
-
 ![MAVLink2gRPC Banner](docs/images/mavlink2grpc_banner.png)
+
+[![CI](https://github.com/Setuav/mavlink2grpc/actions/workflows/ci.yml/badge.svg)](https://github.com/Setuav/mavlink2grpc/actions/workflows/ci.yml)
+[![Docs](https://github.com/Setuav/mavlink2grpc/actions/workflows/docs.yml/badge.svg)](https://github.com/Setuav/mavlink2grpc/actions/workflows/docs.yml)
+[![Release](https://github.com/Setuav/mavlink2grpc/actions/workflows/release.yml/badge.svg)](https://github.com/Setuav/mavlink2grpc/actions/workflows/release.yml)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://setuav.github.io/mavlink2grpc/)
+[![PyPI](https://img.shields.io/pypi/v/mavlink2grpc-proto)](https://pypi.org/project/mavlink2grpc-proto/)
+[![Python versions](https://img.shields.io/pypi/pyversions/mavlink2grpc-proto)](https://pypi.org/project/mavlink2grpc-proto/)
+[![npm](https://img.shields.io/npm/v/%40setuav%2Fmavlink2grpc-proto)](https://www.npmjs.com/package/@setuav/mavlink2grpc-proto)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+## About
 
 A high-performance, native bridge and code generator that exposes the entire MAVLink protocol as type-safe gRPC services using modern C++17.
 
 Designed as a robust, type-safe alternative to [mavlink2rest](https://github.com/mavlink/mavlink2rest) for professional UAV systems.
 
 ## Documentation
-Visit the official documentation site at **[setuav.github.io/mavlink2grpc](https://setuav.github.io/mavlink2grpc/)**.
 
-Detailed documentation is also available locally under the `docs/` folder:
-- [Getting Started Guide](docs/getting_started.md)
-- [Architecture & Design](docs/architecture.md)
-- [gRPC API Reference](docs/api_reference.md)
-- [Client Libraries](docs/client_libraries.md)
-- [Developer & Testing Guide](docs/developer_guide.md)
+The full documentation is available at:
+
+**https://setuav.github.io/mavlink2grpc/**
+
+Key sections:
+
+- [Getting Started](https://setuav.github.io/mavlink2grpc/getting_started/)
+- [Architecture & Design](https://setuav.github.io/mavlink2grpc/architecture/)
+- [gRPC API Reference](https://setuav.github.io/mavlink2grpc/api_reference/)
+- [Client Libraries](https://setuav.github.io/mavlink2grpc/client_libraries/)
+- [Developer & Testing Guide](https://setuav.github.io/mavlink2grpc/developer_guide/)
+
+## Packages
+
+Python gRPC stubs:
+
+```bash
+pip install mavlink2grpc-proto
+```
+
+Node.js Protocol Buffer definitions:
+
+```bash
+npm install /mavlink2grpc-proto
+```
 
 ## Features
 * **Schema-First:** Auto-generates Protobuf definitions (`.proto`) directly from MAVLink XMLs.
@@ -45,7 +72,7 @@ QGroundControl-style web-based MAVLink inspector. Node.js backend (Express + Soc
 ### Setup
 ```bash
 # Clone repository
-git clone https://github.com/karakayahuseyin/mavlink2grpc.git
+git clone https://github.com/Setuav/mavlink2grpc.git
 cd mavlink2grpc
 
 # Run setup script (clones mavlink submodule, installs dependencies)
